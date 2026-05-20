@@ -77,11 +77,14 @@
     <!-- 4. HALAMAN SELESAI -->
     <div id="exam-finish" class="hidden bg-white p-8 rounded-xl shadow-md w-full max-w-md text-center">
       <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl font-bold">✓</div>
-      <h2 class="text-2xl font-bold text-gray-800 mb-2">Ujian Selesai!</h2>
+      <h2 class="text-2xl font-bold text-gray-800 mb-2">Latihan Selesai!</h2>
       <p class="text-gray-600 text-sm mb-6">Terima kasih, jawaban Anda telah berhasil terkirim dan disimpan di server database utama sekolah.</p>
-      <div class="bg-gray-50 p-4 rounded-lg border text-sm text-gray-700 space-y-1 mb-4">
-        <p>Nama: <span id="res-nama" class="font-semibold"></span></p>
-        <p>Skor Anda: <span id="res-skor" class="font-bold text-blue-600 text-base"></span></p>
+      <div class="bg-blue-50 p-5 rounded-xl border border-blue-100 text-sm text-gray-700 space-y-2 mb-4 shadow-inner">
+        <p class="text-base">Nama: <span id="res-nama" class="font-bold text-gray-900"></span></p>
+        <div class="py-2 border-t border-b border-blue-200/50">
+          <p class="text-gray-500 text-xs uppercase tracking-wider font-semibold">Skor Hasil Latihan Anda</p>
+          <p class="text-3xl font-mono font-black text-blue-600 mt-1"><span id="res-skor">0.00</span></p>
+        </div>
       </div>
     </div>
 
@@ -89,7 +92,7 @@
 
   <!-- CORE LOGIC ENGINE (JAVASCRIPT) -->
   <script>
-    // ⚠️ PASTE URL WEB APP APPS SCRIPT ANDA DI SINI
+    // URL Web App Apps Script Anda
     const API_URL = "https://script.google.com/macros/s/AKfycbx9jtUyjq8i17trZJr2I_yVPayVr5vz2oDlPkRJd_IITDEHWRC0cf8-s1vqGMQZFS7B/exec";
     
     let currentUser = null;
@@ -252,14 +255,14 @@
 
     function triggerSubmit() {
       const terformat = Object.keys(jawabanSiswa).length;
-      const konfirmasi = confirm(`Anda menjawab ${terformat} dari ${daftarSoal.length} soal.\nYakin ingin mengakhiri sesi ujian ini?`);
+      const konfirmasi = confirm(`Anda menjawab ${terformat} dari ${daftarSoal.length} soal.\nYakin ingin mengakhiri sesi latihan ini?`);
       if(konfirmasi) prosesKirimUjian();
     }
 
     async function prosesKirimUjian() {
       clearInterval(hitungMundur);
-      switchSection("exam-room", "login-card"); // Tampilkan loading state sementara
-      document.getElementById("btn-login").innerText = "Mengirim Nilai...";
+      switchSection("exam-room", "login-card"); 
+      document.getElementById("btn-login").innerText = "Mengkalkulasi Skor...";
       document.getElementById("btn-login").disabled = true;
 
       try {
@@ -271,11 +274,15 @@
 
         if(res.status === "success") {
           document.getElementById("res-nama").innerText = currentUser.nama;
-          document.getElementById("res-skor").innerText = res.skor;
+          document.getElementById("res-skor").innerText = res.skor; // Menampilkan skor langsung ke layar siswa
           switchSection("login-card", "exam-finish");
         }
       } catch (e) {
-        alert("Gagal mengirim lembar jawaban. Segera hubungi proktor/pengawas!");
+        alert("Gagal memproses nilai latihan. Silakan coba kirim ulang.");
+        switchSection("login-card", "exam-room");
+      } finally {
+        document.getElementById("btn-login").innerText = "Masuk Ujian";
+        document.getElementById("btn-login").disabled = false;
       }
     }
 
